@@ -102,17 +102,16 @@ def update_drink(id):
         drink = Drink.query.filter(Drink.id == id).one_or_none() 
         if not drink : raise
         body = request.get_json()
-        drink.title = body['title'] or drink.title
-        drink.recipe = json.dumps(body['recipe']) or drink.recipe
+        drink.title = body.get('title', drink.title)
+        recipe = json.dumps(body.get('recipe'))
+        drink.recipe = recipe if recipe != 'null' else drink.recipe
         drink.update()
-        return  jsonify({"success": True, "drinks": drink.long()}), 200
+        return  jsonify({"success": True, "drinks": [drink.long()]}), 200
     except AuthError:
         abort()
     except:
         if not drink: abort(404)
         abort(422)
-
-
 
 '''
 @TODO implement endpoint

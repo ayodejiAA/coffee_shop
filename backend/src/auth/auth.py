@@ -80,7 +80,10 @@ def check_permissions(permission, payload):
             'description': 'Permissions not included in JWT.'
         }, 400)
 
-    if permission not in payload['permissions']:
+
+
+    permissions = payload['permissions']
+    if permission not in permissions:
         raise AuthError({
             'code': 'unauthorized',
             'description': 'Permission not found.'
@@ -115,7 +118,12 @@ def verify_decode_jwt(token):
             }, 401)
 
         for key in jwks['keys']:
-            if key['kid'] == unverified_header['kid']:
+            if key['kid'] != unverified_header['kid']:
+                raise AuthError({
+                    'code': 'invalid_header',
+                    'description': 'Authorization malformed.'
+                }, 401)
+            elif key['kid'] == unverified_header['kid']:
                 rsa_key = {
                     'kty': key['kty'],
                     'kid': key['kid'],
